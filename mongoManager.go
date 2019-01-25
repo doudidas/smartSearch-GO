@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"os"
 
 	"github.com/mongodb/mongo-go-driver/bson"
 	"github.com/mongodb/mongo-go-driver/mongo"
@@ -15,7 +16,7 @@ var defaultDB = "SmartSearchDatabase"
 var client *mongo.Client
 
 func initMongo() {
-	databaseFQDN = "mongo"
+	databaseFQDN = getDatabaseFQDN()
 	databasePort = "27017"
 	c := startSession()
 	getDatabaseInformations(c)
@@ -76,4 +77,15 @@ func getDatabaseInformations(c *mongo.Client) {
 		}
 	}
 	fmt.Println("***************************")
+}
+
+func getDatabaseFQDN() string {
+	if _, err := os.Stat("/.dockerenv"); err == nil {
+		// /.dockerenv exists
+		return "mongo"
+	} else if os.IsNotExist(err) {
+		// /.dockerenv does *not* exist
+		return "localhost"
+	}
+	return "localhost"
 }
