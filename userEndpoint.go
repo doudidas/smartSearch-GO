@@ -6,10 +6,9 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/mongodb/mongo-go-driver/bson/objectid"
-
 	"github.com/gin-gonic/gin"
 	"github.com/mongodb/mongo-go-driver/bson"
+	"github.com/mongodb/mongo-go-driver/bson/objectid"
 )
 
 // User structure from mongo database
@@ -78,6 +77,7 @@ func deleteUserByID(c *gin.Context) {
 func modifyUserbyID(c *gin.Context) {
 }
 
+// FOO...
 type FOO struct {
 	firstname string `json:"firstname"`
 	lastname  string `json:"lastname"`

@@ -1,3 +1,3 @@
 #!/bin/bash
 go build
-./smartSearch-GO localhost
+./smartSearch-GO

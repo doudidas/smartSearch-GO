@@ -5,7 +5,7 @@ import (
 )
 
 func main() {
-	initDatabase()
+	initDB("mongo")
 
 	router := gin.Default()
 
@@ -45,8 +45,4 @@ func main() {
 		})
 	}
 	router.Run(":9000")
-}
-func initDatabase() {
-	//initMongo()
-	initPostgres()
 }

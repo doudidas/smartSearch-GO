@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"os"
 
 	"github.com/mongodb/mongo-go-driver/bson"
 	"github.com/mongodb/mongo-go-driver/mongo"
@@ -16,16 +15,13 @@ var defaultDB = "SmartSearchDatabase"
 var client *mongo.Client
 
 func initMongo() {
-
-	if len(os.Args) != 2 {
-		log.Fatal("please provide input. app [databaseFQDN]")
-	}
-	databaseFQDN = os.Args[1]
+	databaseFQDN = "mongo"
 	databasePort = "27017"
 	c := startSession()
 	getDatabaseInformations(c)
 	endSession(c)
 }
+
 func startSession() *mongo.Client {
 	fullPath := "mongodb://" + databaseFQDN + ":" + databasePort
 	fmt.Println("connexion asked on ", fullPath)
