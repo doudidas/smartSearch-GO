@@ -15,9 +15,7 @@ func main() {
 		router.HandleContext(c)
 	})
 	router.GET("/ping", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"message": "pong",
-		})
+		c.String(200, "pong")
 	})
 	router.GET("/health", func(c *gin.Context) {
 	})
@@ -49,8 +47,5 @@ func main() {
 		destinationGroup.GET("user/:id", func(c *gin.Context) {
 		})
 	}
-	router.GET("ping", func(c *gin.Context) {
-		c.String(200, "pong")
-	})
 	router.Run(":9001")
 }
