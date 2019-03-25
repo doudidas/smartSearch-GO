@@ -49,5 +49,10 @@ func main() {
 		destinationGroup.GET("user/:id", func(c *gin.Context) {
 		})
 	}
+	router.GET("ping", func(c *gin.Context) {
+		c.JSON(200, gin.H{
+			"message": "pong",
+		})
+	})
 	router.Run(":9001")
 }
