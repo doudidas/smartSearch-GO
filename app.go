@@ -8,6 +8,12 @@ func main() {
 	var c gin.Context
 	router := gin.Default()
 	initDB(&c)
+	router.GET("/api/:uri", func(c *gin.Context) {
+		c.Request.URL.Path = "/" + c.Param("uri")
+		println(c.Request.URL.Path)
+		println(c.Request.URL.Path)
+		router.HandleContext(c)
+	})
 	router.GET("/ping", func(c *gin.Context) {
 		c.JSON(200, gin.H{
 			"message": "pong",
@@ -43,5 +49,5 @@ func main() {
 		destinationGroup.GET("user/:id", func(c *gin.Context) {
 		})
 	}
-	router.Run(":9000")
+	router.Run(":9001")
 }
