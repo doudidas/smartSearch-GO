@@ -3,22 +3,35 @@
 ############################
 FROM golang:alpine AS builder
 
-# Setup work directory
-WORKDIR /go/src/app
-# Add my code on container
-ADD . /go/src/app
-# Use script to avoid multple docker RUN 
-RUN /go/src/app/docker.sh
+
+# Git is required for fetching the dependencies.
+RUN apk add --no-cache git
+
+# Set the working directory outside $GOPATH to enable the support for modules.
+WORKDIR /src
+
+# Fetch dependencies first; they are less susceptible to change on every build
+# and will therefore be cached for speeding up the next build
+COPY ./go.mod ./go.sum ./
+RUN go mod download
+# Import the code from the context.
+COPY ./ ./
+
+# Build the executable to `/app`. Mark the build as statically linked.
+RUN CGO_ENABLED=0 go build -installsuffix 'static' -o /app .
 
 ############################
 # STEP 2 build a small image
 ############################
 FROM scratch
-# Copy our static executable.
-COPY --from=builder /go/bin/main /go/bin/
+
+# Import the compiled executable from the first stage.
+COPY --from=builder /app /app
+
 #Set env variable
 ENV GIN_MODE=release
+
 # Expose port
 EXPOSE 9000
 # Run the hello binary.
-ENTRYPOINT ["/go/bin/main"]
+ENTRYPOINT ["/app"]
