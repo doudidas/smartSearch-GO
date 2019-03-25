@@ -2,17 +2,14 @@
 # STEP 1 build executable binary
 ############################
 FROM golang:alpine AS builder
-# Install git.
-# Git is required for fetching the dependencies.
-RUN apk update && apk add --no-cache git
-RUN mkdir /app 
-ADD . /app/ 
-WORKDIR /app 
-# Fetch dependencies.
-# Using go get.
-RUN go get -d -v github.com/gin-gonic/gin github.com/lib/pq github.com/mongodb/mongo-go-driver/bson github.com/mongodb/mongo-go-driver/mongo
-# Build the binary.
-RUN GOOS=linux GOARCH=amd64 go build -ldflags="-w -s" -o /go/bin/main
+
+# Setup work directory
+WORKDIR /go/src/app
+# Add my code on container
+ADD . /go/src/app
+# Use script to avoid multple docker RUN 
+RUN /go/src/app/docker.sh
+
 ############################
 # STEP 2 build a small image
 ############################
