@@ -1,11 +1,27 @@
-FROM golang:latest as build
+############################
+# STEP 1 build executable binary
+############################
+FROM golang:alpine AS builder
+# Install git.
+# Git is required for fetching the dependencies.
+RUN apk update && apk add --no-cache git
 RUN mkdir /app 
 ADD . /app/ 
 WORKDIR /app 
-ENV GIN_MODE=release
-RUN go get -v github.com/gin-gonic/gin && go get -v gopkg.in/mgo.v2 && CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o main .
-
+# Fetch dependencies.
+# Using go get.
+RUN go get -d -v github.com/gin-gonic/gin github.com/lib/pq github.com/mongodb/mongo-go-driver/bson github.com/mongodb/mongo-go-driver/mongo
+# Build the binary.
+RUN GOOS=linux GOARCH=amd64 go build -ldflags="-w -s" -o /go/bin/main
+############################
+# STEP 2 build a small image
+############################
 FROM scratch
-COPY --from=build app/main ./app
+# Copy our static executable.
+COPY --from=builder /go/bin/main /go/bin/main
+#Set env variable
+ENV GIN_MODE=release
+# Expose port
 EXPOSE 9000
-CMD ["./app", "mongo"]
+# Run the hello binary.
+ENTRYPOINT ["/go/bin/main"]

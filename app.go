@@ -5,25 +5,24 @@ import (
 )
 
 func main() {
-	initDB("mongo")
-
+	var c gin.Context
 	router := gin.Default()
-
-	router.GET("/ping", ping)
+	initDB(&c)
+	router.GET("/ping", func(c *gin.Context) {
+		c.JSON(200, gin.H{
+			"message": "pong",
+		})
+	})
 	router.GET("/health", func(c *gin.Context) {
-		// c := startSession()
-		// response := gin.H{
-		// 	"database": c.LiveServers(),
-		// }
-		// c.JSON(200, response)
 	})
 
 	userGroup := router.Group("/user")
 	{
-		userGroup.GET("", getUser)
+		userGroup.GET("", getUsers)
 		userGroup.GET(":userID", getUserbyID)
 		userGroup.DELETE(":userID", deleteUserByID)
-		userGroup.PUT(":id", modifyUserbyID)
+		userGroup.PUT(":userID/email/:email", modifyUserEmail)
+		userGroup.PUT(":userID", modifyUserbyID)
 		userGroup.POST("", createUser)
 	}
 	topicGroup := router.Group("/topic")
