@@ -47,5 +47,5 @@ func main() {
 		destinationGroup.GET("user/:id", func(c *gin.Context) {
 		})
 	}
-	router.Run(":9001")
+	router.Run(":9000")
 }
