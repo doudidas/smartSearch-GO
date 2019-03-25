@@ -15,7 +15,7 @@ RUN /go/src/app/docker.sh
 ############################
 FROM scratch
 # Copy our static executable.
-COPY --from=builder /go/bin/main /go/bin/main
+COPY --from=builder /go/bin/main /go/bin/
 #Set env variable
 ENV GIN_MODE=release
 # Expose port
