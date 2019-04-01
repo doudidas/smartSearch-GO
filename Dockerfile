@@ -1,6 +1,7 @@
-############################
+#################################
 # STEP 1 build executable binary
-############################
+#################################
+
 FROM golang:alpine AS builder
 
 
@@ -20,9 +21,10 @@ COPY ./ ./
 # Build the executable to `/app`. Mark the build as statically linked.
 RUN CGO_ENABLED=0 go build -installsuffix 'static' -o /app .
 
-############################
-# STEP 2 build a small image
-############################
+#################################
+# STEP 2 Copy into a small image
+#################################
+
 FROM scratch
 
 # Import the compiled executable from the first stage.
