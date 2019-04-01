@@ -5,25 +5,28 @@ import (
 )
 
 func main() {
-	initDB("mongo")
-
+	var c gin.Context
 	router := gin.Default()
-
-	router.GET("/ping", ping)
+	initDB(&c)
+	router.GET("/api/:uri", func(c *gin.Context) {
+		c.Request.URL.Path = "/" + c.Param("uri")
+		println(c.Request.URL.Path)
+		println(c.Request.URL.Path)
+		router.HandleContext(c)
+	})
+	router.GET("/ping", func(c *gin.Context) {
+		c.String(200, "pong")
+	})
 	router.GET("/health", func(c *gin.Context) {
-		// c := startSession()
-		// response := gin.H{
-		// 	"database": c.LiveServers(),
-		// }
-		// c.JSON(200, response)
 	})
 
 	userGroup := router.Group("/user")
 	{
-		userGroup.GET("", getUser)
+		userGroup.GET("", getUsers)
 		userGroup.GET(":userID", getUserbyID)
 		userGroup.DELETE(":userID", deleteUserByID)
-		userGroup.PUT(":id", modifyUserbyID)
+		userGroup.PUT(":userID/email/:email", modifyUserEmail)
+		userGroup.PUT(":userID", modifyUserbyID)
 		userGroup.POST("", createUser)
 	}
 	topicGroup := router.Group("/topic")
