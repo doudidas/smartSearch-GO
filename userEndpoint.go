@@ -13,7 +13,7 @@ import (
 
 // User structure from mongo database
 type User struct {
-	id        primitive.ObjectID `bson:"id"`
+	_id       primitive.ObjectID `bson:"_id"`
 	firstName string             `bson:"firstName"`
 	lastName  string             `bson:"lastName"`
 	email     string             `bson:"email"`
@@ -45,6 +45,7 @@ func getUsers(c *gin.Context) {
 	cur, err := collection.Find(c, filter)
 	if err != nil {
 		c.AbortWithError(500, err)
+		return
 	}
 	defer cur.Close(c)
 	var result []primitive.M
@@ -62,7 +63,29 @@ func getUsers(c *gin.Context) {
 	}
 	c.JSON(200, result)
 }
-func deleteUserByID(c *gin.Context) {}
+func deleteUserByID(c *gin.Context) {
+	client := getClient()
+	defer client.Disconnect(context.Background())
+	collection := getUserCollection(client)
+
+	objectID, err := primitive.ObjectIDFromHex(c.Param("userID"))
+	if err != nil {
+		c.AbortWithStatusJSON(500, gin.H{"error": "Invalid input. Please check format"})
+		return
+	}
+	filter := primitive.M{"_id": objectID}
+	var result primitive.M
+	collection.FindOneAndDelete(context.Background(), filter).Decode(&result)
+
+	if result == nil {
+		message := "Failed to remove user with this ID " + c.Param("userID")
+		customLog(message)
+		c.AbortWithStatusJSON(500, gin.H{"error": message})
+		return
+	}
+	c.JSON(200, result)
+
+}
 func modifyUserEmail(c *gin.Context) {
 	client := getClient()
 	defer client.Disconnect(context.Background())
