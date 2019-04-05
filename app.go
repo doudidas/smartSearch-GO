@@ -1,14 +1,18 @@
 package main
 
 import (
+	"github.com/gin-contrib/location"
 	"github.com/gin-gonic/gin"
 )
 
 func main() {
 	// var c gin.Context
 	router := gin.Default()
+	router.Use(location.Default())
 	initDB()
+
 	router.GET("/api/:uri", func(c *gin.Context) {
+		customLog("Request from: " + c.ClientIP())
 		c.Request.URL.Path = "/" + c.Param("uri")
 		println(c.Request.URL.Path)
 		println(c.Request.URL.Path)
@@ -47,5 +51,6 @@ func main() {
 		destinationGroup.GET("user/:id", func(c *gin.Context) {
 		})
 	}
+
 	router.Run(":9000")
 }
