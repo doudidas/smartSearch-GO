@@ -1,6 +1,8 @@
 package main
 
 import (
+	"strconv"
+
 	"github.com/gin-contrib/location"
 	"github.com/gin-gonic/gin"
 )
@@ -12,10 +14,9 @@ func main() {
 	initDB()
 
 	router.GET("/api/:uri", func(c *gin.Context) {
-		customLog("Request from: " + c.ClientIP())
 		c.Request.URL.Path = "/" + c.Param("uri")
-		println(c.Request.URL.Path)
-		println(c.Request.URL.Path)
+		username, password, ok := c.Request.BasicAuth()
+		customLog("username: " + username + ", password: " + password + ",ok: " + strconv.FormatBool(ok))
 		router.HandleContext(c)
 	})
 	router.GET("/ping", func(c *gin.Context) {
