@@ -5,9 +5,9 @@ import (
 )
 
 func main() {
-	var c gin.Context
+	// var c gin.Context
 	router := gin.Default()
-	initDB(&c)
+	initDB()
 	router.GET("/api/:uri", func(c *gin.Context) {
 		c.Request.URL.Path = "/" + c.Param("uri")
 		println(c.Request.URL.Path)

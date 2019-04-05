@@ -20,7 +20,8 @@ type User struct {
 }
 
 func getUserbyID(c *gin.Context) {
-	client := getClient(c)
+	client := getClient()
+	defer client.Disconnect(context.Background())
 	collection := getUserCollection(client)
 	customLog(c.Param("userID"))
 	objectID, err := primitive.ObjectIDFromHex(c.Param("userID"))
@@ -32,16 +33,18 @@ func getUserbyID(c *gin.Context) {
 	var result primitive.M
 	collection.FindOne(c, filter).Decode(&result)
 	fmt.Println(result)
+
 	c.JSON(200, result)
 }
 
 func getUsers(c *gin.Context) {
-	client := getClient(c)
+	client := getClient()
+	defer client.Disconnect(context.Background())
 	collection := getUserCollection(client)
 	filter := primitive.M{}
 	cur, err := collection.Find(c, filter)
 	if err != nil {
-		log.Fatal(err)
+		c.AbortWithError(500, err)
 	}
 	defer cur.Close(c)
 	var result []primitive.M
@@ -50,19 +53,19 @@ func getUsers(c *gin.Context) {
 		var tmp primitive.M
 		err := cur.Decode(&tmp)
 		if err != nil {
-			log.Fatal(err)
+			c.AbortWithError(500, err)
 		}
 		result = append(result, tmp)
 	}
 	if err := cur.Err(); err != nil {
-		log.Fatal(err)
+		c.AbortWithError(500, err)
 	}
-
 	c.JSON(200, result)
 }
 func deleteUserByID(c *gin.Context) {}
 func modifyUserEmail(c *gin.Context) {
-	client := getClient(c)
+	client := getClient()
+	defer client.Disconnect(context.Background())
 	collection := getUserCollection(client)
 
 	value := primitive.M{
@@ -85,7 +88,8 @@ func modifyUserEmail(c *gin.Context) {
 	c.JSON(200, output)
 }
 func modifyUserbyID(c *gin.Context) {
-	client := getClient(c)
+	client := getClient()
+	defer client.Disconnect(context.Background())
 	collection := getUserCollection(client)
 
 	var value primitive.M
@@ -116,7 +120,8 @@ func modifyUserbyID(c *gin.Context) {
 }
 
 func createUser(c *gin.Context) {
-	client := getClient(c)
+	client := getClient()
+	defer client.Disconnect(context.Background())
 	collection := getUserCollection(client)
 
 	var value primitive.M

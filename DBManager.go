@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"os"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -10,42 +11,47 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/readpref"
 )
 
-func initDB(c *gin.Context) {
-	client := getClient(c)
-	ping(client, c)
-	getDatabase(client)
+var hostname string
+
+func initDB() {
+	setHostname()
+	err := pingMongo()
+	if err != nil {
+		panic(err)
+	}
 }
 
-var hostname = "mongo"
-
-func getClient(c *gin.Context) *mongo.Client {
-	customLog("ask for DB client")
-	client, err := mongo.Connect(c, options.Client().ApplyURI("mongodb://"+hostname+":27017"))
-
-	if err != nil {
-		customLog("try local database")
+func setHostname() {
+	if os.Getenv("MONGO-HOSTNAME") != "" {
+		hostname = os.Getenv("MONGO-HOSTNAME")
+	} else {
 		hostname = "localhost"
-		client, err = mongo.Connect(c, options.Client().ApplyURI("mongodb://"+hostname+":27017"))
-		if err != nil {
-			panic(err)
-		}
+	}
+	customLog("mongo DB hostname set to " + hostname)
+}
+func getClient() *mongo.Client {
+	customLog("ask for DB client")
+	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
+	defer cancel()
+	client, err := mongo.Connect(ctx, options.Client().ApplyURI("mongodb://"+hostname+":27017"))
+	if err != nil {
+		panic(err)
 	}
 	customLog("DB client granted")
 	return client
 }
 
-func ping(client *mongo.Client, ctx *gin.Context) error {
+func pingMongo() error {
+	client := getClient()
+	ctx := gin.Context{}
 	customLog("pinging database with this FQDN: " + hostname)
-	shortCtx, _ := context.WithTimeout(ctx, 1*time.Second)
+	shortCtx, cancelFunc := context.WithTimeout(&ctx, 1*time.Second)
+	defer cancelFunc()
+
 	err := client.Ping(shortCtx, readpref.Primary())
+	defer client.Disconnect(&ctx)
 	if err != nil {
-		customLog("Switching to local database")
-		hostname = "localhost"
-		client = getClient(ctx)
-		err = ping(client, ctx)
-		if err != nil {
-			panic(err)
-		}
+		return err
 	}
 	customLog("pong")
 	return nil
@@ -53,7 +59,6 @@ func ping(client *mongo.Client, ctx *gin.Context) error {
 
 func getDatabase(c *mongo.Client) *mongo.Database {
 	name := "GoSmartSearchDatabase"
-	customLog("Looking for " + name)
 	database := c.Database(name)
 	return database
 }
