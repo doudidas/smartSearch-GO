@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"time"
 
@@ -19,6 +20,7 @@ func initDB() {
 	if err != nil {
 		panic(err)
 	}
+	monitor()
 }
 
 func setHostname() {
@@ -61,4 +63,12 @@ func getDatabase(c *mongo.Client) *mongo.Database {
 	name := "GoSmartSearchDatabase"
 	database := c.Database(name)
 	return database
+}
+
+func monitor() {
+	var o string
+	c := getClient()
+	d := c.Database("admin")
+	d.RunCommand(context.Background(), "db.enableFreeMonitoring()").Decode(&o)
+	fmt.Println(o)
 }
