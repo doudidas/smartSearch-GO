@@ -12,3 +12,4 @@
 *.out
 smartSearch-GO
 vendor
+.vscode
