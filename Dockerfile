@@ -32,8 +32,9 @@ COPY --from=builder /app /app
 
 #Set env variable
 ENV GIN_MODE=release
-
+ENV MONGO-HOSTNAME=mongo
 # Expose port
 EXPOSE 9000
+
 # Run the hello binary.
 ENTRYPOINT ["/app"]
