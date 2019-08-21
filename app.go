@@ -37,5 +37,5 @@ func main() {
 		topicGroup.GET("/:topicID", func(c *gin.Context) {})
 	}
 
-	router.Run(":9000")
+	router.Run(":80")
 }

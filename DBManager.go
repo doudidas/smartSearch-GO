@@ -24,8 +24,8 @@ func initDB() {
 }
 
 func setHostname() {
-	if os.Getenv("MONGO-HOSTNAME") != "" {
-		hostname = os.Getenv("MONGO-HOSTNAME")
+	if os.Getenv("MONGO_HOSTNAME") != "" {
+		hostname = os.Getenv("MONGO_HOSTNAME")
 	} else {
 		hostname = "localhost"
 	}
