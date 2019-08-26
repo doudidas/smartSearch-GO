@@ -6,18 +6,11 @@ import (
 	"log"
 
 	"github.com/gin-gonic/gin"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
-
-// User structure from mongo database
-type User struct {
-	_id       primitive.ObjectID `bson:"_id"`
-	firstName string             `bson:"firstName"`
-	lastName  string             `bson:"lastName"`
-	email     string             `bson:"email"`
-}
 
 func getUserbyID(c *gin.Context) {
 	client := getClient()
@@ -29,8 +22,8 @@ func getUserbyID(c *gin.Context) {
 		c.String(500, "Invalid input. Please check format")
 		return
 	}
-	filter := primitive.M{"_id": objectID}
-	var result primitive.M
+	filter := bson.M{"_id": objectID}
+	var result bson.M
 	collection.FindOne(c, filter).Decode(&result)
 	fmt.Println(result)
 
@@ -41,17 +34,15 @@ func getUsers(c *gin.Context) {
 	client := getClient()
 	defer client.Disconnect(context.Background())
 	collection := getUserCollection(client)
-	filter := primitive.M{}
-	cur, err := collection.Find(c, filter)
+	cur, err := collection.Find(c, bson.D{{}})
 	if err != nil {
 		c.AbortWithError(500, err)
 		return
 	}
 	defer cur.Close(c)
-	var result []primitive.M
-
+	var result []bson.M
 	for cur.Next(c) {
-		var tmp primitive.M
+		var tmp bson.M
 		err := cur.Decode(&tmp)
 		if err != nil {
 			c.AbortWithError(500, err)
@@ -73,8 +64,8 @@ func deleteUserByID(c *gin.Context) {
 		c.AbortWithStatusJSON(500, gin.H{"error": "Invalid input. Please check format"})
 		return
 	}
-	filter := primitive.M{"_id": objectID}
-	var result primitive.M
+	filter := bson.M{"_id": objectID}
+	var result bson.M
 	collection.FindOneAndDelete(context.Background(), filter).Decode(&result)
 
 	if result == nil {
@@ -91,8 +82,8 @@ func modifyUserEmail(c *gin.Context) {
 	defer client.Disconnect(context.Background())
 	collection := getUserCollection(client)
 
-	value := primitive.M{
-		"$set": primitive.M{
+	value := bson.M{
+		"$set": bson.M{
 			"email": c.Param("email"),
 		},
 	}
@@ -101,26 +92,26 @@ func modifyUserEmail(c *gin.Context) {
 		c.String(500, "Invalid input. Please check format")
 		return
 	}
-	filter := primitive.M{"_id": objectID}
+	filter := bson.M{"_id": objectID}
 	fmt.Println(value)
-	var output primitive.M
+	var output bson.M
 	collection.FindOneAndUpdate(context.Background(), filter, value).Decode(&output)
 	if err != nil {
 		log.Fatal(err)
 	}
 	c.JSON(200, output)
 }
-func modifyUserbyID(c *gin.Context) {
+func modifyUserByID(c *gin.Context) {
 	client := getClient()
 	defer client.Disconnect(context.Background())
 	collection := getUserCollection(client)
 
-	var value primitive.M
+	var value bson.M
 	err := c.ShouldBindJSON(&value)
 	if err != nil {
 		log.Fatal(err)
 	}
-	update := primitive.M{
+	update := bson.M{
 		"$set": value,
 	}
 
@@ -129,8 +120,8 @@ func modifyUserbyID(c *gin.Context) {
 		c.String(500, "Invalid input. Please check format")
 		return
 	}
-	filter := primitive.M{"_id": objectID}
-	var output primitive.M
+	filter := bson.M{"_id": objectID}
+	var output bson.M
 
 	opt := options.FindOneAndUpdateOptions{}
 	opt.SetReturnDocument(options.After)
@@ -147,7 +138,7 @@ func createUser(c *gin.Context) {
 	defer client.Disconnect(context.Background())
 	collection := getUserCollection(client)
 
-	var value primitive.M
+	var value bson.M
 	err := c.ShouldBindJSON(&value)
 	if err != nil {
 		log.Fatal(err)

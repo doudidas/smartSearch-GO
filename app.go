@@ -31,13 +31,16 @@ func main() {
 			userGroup.GET(":userID", getUserbyID)
 			userGroup.DELETE(":userID", deleteUserByID)
 			userGroup.PUT(":userID/email/:email", modifyUserEmail)
-			userGroup.PUT(":userID", modifyUserbyID)
+			userGroup.PUT(":userID", modifyUserByID)
 			userGroup.POST("", createUser)
 		}
 		topicGroup := adminGroup.Group("topic")
 		{
-			topicGroup.GET("", func(c *gin.Context) {})
-			topicGroup.GET("/:topicID", func(c *gin.Context) {})
+			topicGroup.GET("", getTopics)
+			topicGroup.GET(":topicID", getTopicbyID)
+			topicGroup.DELETE(":topicID", deleteTopicByID)
+			topicGroup.PUT(":topicID", modifyTopicByID)
+			topicGroup.POST("", createTopic)
 		}
 	}
 	router.Run(":80")
