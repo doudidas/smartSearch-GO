@@ -128,7 +128,7 @@ func modifyUserByID(c *gin.Context) {
 
 	collection.FindOneAndUpdate(c, filter, update, &opt).Decode(&output)
 	if err != nil {
-		log.Fatal(err)
+		c.AbortWithError(500, err)
 	}
 	c.JSON(200, output)
 }
@@ -138,13 +138,13 @@ func createUser(c *gin.Context) {
 	defer client.Disconnect(context.Background())
 	collection := getUserCollection(client)
 
-	var value bson.M
-	err := c.ShouldBindJSON(&value)
+	var values bson.A
+	err := c.ShouldBindJSON(&values)
 	if err != nil {
-		log.Fatal(err)
+		c.AbortWithStatusJSON(500, "Please provide an array of JSON files")
 	}
-	result, _ := collection.InsertOne(context.Background(), value)
-	c.JSON(200, result.InsertedID)
+	result, _ := collection.InsertMany(context.Background(), values)
+	c.JSON(200, result.InsertedIDs)
 }
 
 func getUserCollection(client *mongo.Client) *mongo.Collection {

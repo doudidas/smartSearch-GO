@@ -16,6 +16,10 @@ func main() {
 	})
 	adminGroup := router.Group("/api", gin.BasicAuth(admin))
 	{
+		adminGroup.GET("", func(c *gin.Context) {
+			c.Request.URL.Path = "/swagger/"
+			router.HandleContext(c)
+		})
 		adminGroup.GET("healthcheck", func(c *gin.Context) {
 			err := pingMongo()
 			if err != nil {
@@ -43,5 +47,6 @@ func main() {
 			topicGroup.POST("", createTopic)
 		}
 	}
+
 	router.Run(":80")
 }
