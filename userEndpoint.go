@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
@@ -31,10 +32,18 @@ func getUserbyID(c *gin.Context) {
 }
 
 func getUsers(c *gin.Context) {
+	page := c.DefaultQuery("page", "0")
+	pageSize := c.DefaultQuery("size", strconv.Itoa(defaultPageValue))
+	findOptions := options.Find()
+
+	pageAsNumber, _ := strconv.ParseInt(page, 10, 64)
+	sizeAsNumber, _ := strconv.ParseInt(pageSize, 10, 64)
+	findOptions.SetSkip(pageAsNumber * sizeAsNumber)
+	findOptions.SetLimit(sizeAsNumber)
 	client := getClient()
 	defer client.Disconnect(context.Background())
 	collection := getUserCollection(client)
-	cur, err := collection.Find(c, bson.D{{}})
+	cur, err := collection.Find(c, bson.D{{}}, findOptions)
 	if err != nil {
 		c.AbortWithError(500, err)
 		return

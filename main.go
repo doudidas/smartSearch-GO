@@ -5,6 +5,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+const defaultPageValue = 20
+
 func main() {
 	router := gin.Default()
 	router.Use(location.Default())
