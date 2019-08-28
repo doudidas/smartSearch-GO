@@ -1,3 +1,3 @@
 #!/bin/bash
-go build
-./smartSearch-GO
+go build -o build/app 
+build/app
