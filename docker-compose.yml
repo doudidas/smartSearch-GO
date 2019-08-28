@@ -1,0 +1,17 @@
+version: '3'
+services:
+  spacelama-api:
+    container_name: smartsearch-api
+    image: 'spacelama/api-go:dev'
+    depends_on:
+      - mongo
+    ports:
+      - "9000:9000"
+  mongo:
+    image: 'mongo:latest'
+    container_name: mongo
+    ports:
+      - '27017:27017'
+    volumes:
+      - '.mongo/configdb:/data/configdb'
+      - '.mongo/db:/data/db'

@@ -14,18 +14,25 @@ import (
 )
 
 var hostname string
+var port string
 
 // DBTimeout is the maximum response time from DB
 const DBTimeout = 500
 
-func setHostname() {
+func setMongoParameters() {
 	if os.Getenv("MONGO_HOSTNAME") != "" {
 		hostname = os.Getenv("MONGO_HOSTNAME")
 	} else {
 		customWarn("USING LOCAL DATABASE")
 		hostname = "localhost"
 	}
-	customLog("mongo DB hostname set to " + hostname)
+	if os.Getenv("MONGO_PORT") != "" {
+		port = os.Getenv("MONGO_PORT")
+	} else {
+		customWarn("USING DEFAULT DATABASE")
+		port = "27017"
+	}
+	customLog("DB: {name: mongo, hostname:" + hostname + ", port:" + port + "}")
 }
 
 func getClient(c *gin.Context) (*mongo.Client, error) {

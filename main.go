@@ -8,8 +8,11 @@ import (
 
 const defaultPageValue = 20
 
+func init() {
+	setMongoParameters()
+}
+
 func main() {
-	setHostname()
 	router := gin.Default()
 	router.Use(location.Default())
 	router.Use(favicon.New("./favicon.ico"))
