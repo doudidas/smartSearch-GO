@@ -1,9 +1,7 @@
 package main
 
 import (
-	"context"
 	"fmt"
-	"log"
 
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
@@ -13,8 +11,11 @@ import (
 )
 
 func getTopicbyID(c *gin.Context) {
-	client := getClient()
-	defer client.Disconnect(context.Background())
+	client, err := getClient(c)
+	if err != nil {
+		c.AbortWithStatusJSON(500, err.Error())
+	}
+	defer client.Disconnect(c)
 	collection := getTopicCollection(client)
 	customLog(c.Param("TopicID"))
 	objectID, err := primitive.ObjectIDFromHex(c.Param("TopicID"))
@@ -31,13 +32,15 @@ func getTopicbyID(c *gin.Context) {
 }
 
 func getTopics(c *gin.Context) {
-	client := getClient()
-	defer client.Disconnect(context.Background())
+	client, err := getClient(c)
+	if err != nil {
+		c.AbortWithStatusJSON(500, err.Error())
+	}
+	defer client.Disconnect(c)
 	collection := getTopicCollection(client)
 	cur, err := collection.Find(c, bson.D{{}})
 	if err != nil {
-		c.AbortWithError(500, err)
-		return
+		c.AbortWithStatusJSON(500, err.Error())
 	}
 	defer cur.Close(c)
 	var result []bson.M
@@ -45,7 +48,7 @@ func getTopics(c *gin.Context) {
 		var tmp bson.M
 		err := cur.Decode(&tmp)
 		if err != nil {
-			c.AbortWithError(500, err)
+			c.AbortWithStatusJSON(500, err.Error())
 		}
 		result = append(result, tmp)
 	}
@@ -55,8 +58,8 @@ func getTopics(c *gin.Context) {
 	c.JSON(200, result)
 }
 func deleteTopicByID(c *gin.Context) {
-	client := getClient()
-	defer client.Disconnect(context.Background())
+	client, err := getClient(c)
+	defer client.Disconnect(c)
 	collection := getTopicCollection(client)
 
 	objectID, err := primitive.ObjectIDFromHex(c.Param("TopicID"))
@@ -66,7 +69,7 @@ func deleteTopicByID(c *gin.Context) {
 	}
 	filter := bson.M{"_id": objectID}
 	var result bson.M
-	collection.FindOneAndDelete(context.Background(), filter).Decode(&result)
+	collection.FindOneAndDelete(c, filter).Decode(&result)
 
 	if result == nil {
 		message := "Failed to remove Topic with this ID " + c.Param("TopicID")
@@ -78,8 +81,8 @@ func deleteTopicByID(c *gin.Context) {
 
 }
 func modifyTopicEmail(c *gin.Context) {
-	client := getClient()
-	defer client.Disconnect(context.Background())
+	client, err := getClient(c)
+	defer client.Disconnect(c)
 	collection := getTopicCollection(client)
 
 	value := bson.M{
@@ -95,21 +98,21 @@ func modifyTopicEmail(c *gin.Context) {
 	filter := bson.M{"_id": objectID}
 	fmt.Println(value)
 	var output bson.M
-	collection.FindOneAndUpdate(context.Background(), filter, value).Decode(&output)
+	collection.FindOneAndUpdate(c, filter, value).Decode(&output)
 	if err != nil {
-		log.Fatal(err)
+		c.AbortWithStatusJSON(500, err.Error())
 	}
 	c.JSON(200, output)
 }
 func modifyTopicByID(c *gin.Context) {
-	client := getClient()
-	defer client.Disconnect(context.Background())
+	client, err := getClient(c)
+	defer client.Disconnect(c)
 	collection := getTopicCollection(client)
 
 	var value bson.M
-	err := c.ShouldBindJSON(&value)
+	err = c.ShouldBindJSON(&value)
 	if err != nil {
-		log.Fatal(err)
+		c.AbortWithStatusJSON(500, err.Error())
 	}
 	update := bson.M{
 		"$set": value,
@@ -128,22 +131,25 @@ func modifyTopicByID(c *gin.Context) {
 
 	collection.FindOneAndUpdate(c, filter, update, &opt).Decode(&output)
 	if err != nil {
-		log.Fatal(err)
+		c.AbortWithStatusJSON(500, err.Error())
 	}
 	c.JSON(200, output)
 }
 
 func createTopic(c *gin.Context) {
-	client := getClient()
-	defer client.Disconnect(context.Background())
+	client, err := getClient(c)
+	defer client.Disconnect(c)
 	collection := getTopicCollection(client)
 
 	var value bson.M
-	err := c.ShouldBindJSON(&value)
+	err = c.ShouldBindJSON(&value)
 	if err != nil {
-		log.Fatal(err)
+		c.AbortWithStatusJSON(500, err.Error())
 	}
-	result, _ := collection.InsertOne(context.Background(), value)
+	result, err := collection.InsertOne(c, value)
+	if err != nil {
+		c.AbortWithStatusJSON(500, err.Error())
+	}
 	c.JSON(200, result.InsertedID)
 }
 

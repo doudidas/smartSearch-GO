@@ -3,14 +3,19 @@ package main
 import (
 	"github.com/gin-contrib/location"
 	"github.com/gin-gonic/gin"
+	"github.com/thinkerou/favicon"
 )
 
 const defaultPageValue = 20
 
+func init() {
+	setMongoParameters()
+}
+
 func main() {
 	router := gin.Default()
 	router.Use(location.Default())
-	initDB()
+	router.Use(favicon.New("./favicon.ico"))
 	admin := gin.Accounts{"admin": "VMware1!"}
 
 	router.GET("ping", func(c *gin.Context) {
@@ -23,12 +28,13 @@ func main() {
 			router.HandleContext(c)
 		})
 		adminGroup.GET("healthcheck", func(c *gin.Context) {
-			err := pingMongo()
+			var response gin.H
+			_, err := getClient(c)
 			if err != nil {
-				response := gin.H{"api": "true", "mongo": "false"}
-				c.JSONP(200, response)
+				response = gin.H{"api": "true", "mongo": "false"}
+			} else {
+				response = gin.H{"api": "true", "mongo": "true"}
 			}
-			response := gin.H{"api": "true", "mongo": "true"}
 			c.JSON(200, response)
 		})
 		userGroup := adminGroup.Group("user")
@@ -50,5 +56,5 @@ func main() {
 		}
 	}
 
-	router.Run(":80")
+	router.Run(":9000")
 }

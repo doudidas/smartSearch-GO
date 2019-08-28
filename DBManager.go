@@ -2,8 +2,9 @@ package main
 
 import (
 	"context"
-	"fmt"
+	"errors"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -13,62 +14,49 @@ import (
 )
 
 var hostname string
+var port string
 
-func initDB() {
-	setHostname()
-	err := pingMongo()
-	if err != nil {
-		panic(err)
-	}
-	monitor()
-}
+// DBTimeout is the maximum response time from DB
+const DBTimeout = 500
 
-func setHostname() {
+func setMongoParameters() {
 	if os.Getenv("MONGO_HOSTNAME") != "" {
 		hostname = os.Getenv("MONGO_HOSTNAME")
 	} else {
+		customWarn("USING LOCAL DATABASE")
 		hostname = "localhost"
 	}
-	customLog("mongo DB hostname set to " + hostname)
-}
-func getClient() *mongo.Client {
-	customLog("ask for DB client")
-	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
-	defer cancel()
-	client, err := mongo.Connect(ctx, options.Client().ApplyURI("mongodb://"+hostname+":27017"))
-	if err != nil {
-		panic(err)
+	if os.Getenv("MONGO_PORT") != "" {
+		port = os.Getenv("MONGO_PORT")
+	} else {
+		customWarn("USING DEFAULT DATABASE")
+		port = "27017"
 	}
-	customLog("DB client granted")
-	return client
+	customLog("DB: {name: mongo, hostname:" + hostname + ", port:" + port + "}")
 }
 
-func pingMongo() error {
-	client := getClient()
-	ctx := gin.Context{}
+func getClient(c *gin.Context) (*mongo.Client, error) {
+
+	client, err := mongo.Connect(c, options.Client().ApplyURI("mongodb://"+hostname+":27017"))
+	if err != nil {
+		return nil, errors.New("Failed to generate Mongo Client")
+	}
+
 	customLog("pinging database with this FQDN: " + hostname)
-	shortCtx, cancelFunc := context.WithTimeout(&ctx, 1*time.Second)
-	defer cancelFunc()
 
-	err := client.Ping(shortCtx, readpref.Primary())
-	defer client.Disconnect(&ctx)
+	// Short timeout to test mongo connection
+	shortCtx, cancelFunc := context.WithTimeout(c, DBTimeout*time.Millisecond)
+	defer cancelFunc()
+	err = client.Ping(shortCtx, readpref.Primary())
 	if err != nil {
-		return err
+		return nil, errors.New("Unable to reach database within " + strconv.Itoa(DBTimeout) + "ms")
 	}
-	customLog("pong")
-	return nil
+	customLog("Acces granted !")
+	return client, nil
 }
 
 func getDatabase(c *mongo.Client) *mongo.Database {
 	name := "GoSmartSearchDatabase"
 	database := c.Database(name)
 	return database
-}
-
-func monitor() {
-	var o string
-	c := getClient()
-	d := c.Database("admin")
-	d.RunCommand(context.Background(), "db.enableFreeMonitoring()").Decode(&o)
-	fmt.Println(o)
 }

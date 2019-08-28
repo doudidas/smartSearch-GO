@@ -12,6 +12,7 @@ require (
 	github.com/kr/pretty v0.1.0 // indirect
 	github.com/mattn/go-isatty v0.0.8 // indirect
 	github.com/stretchr/testify v1.4.0 // indirect
+	github.com/thinkerou/favicon v0.1.0
 	github.com/tidwall/pretty v0.0.0-20190325153808-1166b9ac2b65 // indirect
 	github.com/ugorji/go v1.1.5-pre // indirect
 	github.com/xdg/scram v0.0.0-20180814205039-7eeb5667e42c // indirect

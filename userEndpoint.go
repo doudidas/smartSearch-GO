@@ -1,9 +1,7 @@
 package main
 
 import (
-	"context"
 	"fmt"
-	"log"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -14,8 +12,11 @@ import (
 )
 
 func getUserbyID(c *gin.Context) {
-	client := getClient()
-	defer client.Disconnect(context.Background())
+	client, err := getClient(c)
+	if err != nil {
+		c.AbortWithStatusJSON(500, err.Error())
+	}
+	defer client.Disconnect(c)
 	collection := getUserCollection(client)
 	customLog(c.Param("userID"))
 	objectID, err := primitive.ObjectIDFromHex(c.Param("userID"))
@@ -27,6 +28,9 @@ func getUserbyID(c *gin.Context) {
 	var result bson.M
 	collection.FindOne(c, filter).Decode(&result)
 	fmt.Println(result)
+	if err != nil {
+		c.AbortWithStatusJSON(500, err.Error())
+	}
 
 	c.JSON(200, result)
 }
@@ -35,37 +39,47 @@ func getUsers(c *gin.Context) {
 	page := c.DefaultQuery("page", "0")
 	pageSize := c.DefaultQuery("size", strconv.Itoa(defaultPageValue))
 	findOptions := options.Find()
-
-	pageAsNumber, _ := strconv.ParseInt(page, 10, 64)
-	sizeAsNumber, _ := strconv.ParseInt(pageSize, 10, 64)
+	pageAsNumber, err := strconv.ParseInt(page, 10, 64)
+	if err != nil {
+		c.AbortWithStatusJSON(500, err.Error())
+	}
+	sizeAsNumber, err := strconv.ParseInt(pageSize, 10, 64)
+	if err != nil {
+		c.AbortWithStatusJSON(500, err.Error())
+	}
 	findOptions.SetSkip(pageAsNumber * sizeAsNumber)
 	findOptions.SetLimit(sizeAsNumber)
-	client := getClient()
-	defer client.Disconnect(context.Background())
+	client, err := getClient(c)
+	if err != nil {
+		c.AbortWithStatusJSON(500, err.Error())
+	}
+	defer client.Disconnect(c)
 	collection := getUserCollection(client)
 	cur, err := collection.Find(c, bson.D{{}}, findOptions)
 	if err != nil {
-		c.AbortWithError(500, err)
-		return
+		c.AbortWithStatusJSON(500, err.Error())
 	}
 	defer cur.Close(c)
 	var result []bson.M
 	for cur.Next(c) {
 		var tmp bson.M
-		err := cur.Decode(&tmp)
+		err = cur.Decode(&tmp)
 		if err != nil {
-			c.AbortWithError(500, err)
+			c.AbortWithStatusJSON(500, err.Error())
 		}
 		result = append(result, tmp)
 	}
 	if err := cur.Err(); err != nil {
-		c.AbortWithError(500, err)
+		c.AbortWithStatusJSON(500, err.Error())
 	}
 	c.JSON(200, result)
 }
 func deleteUserByID(c *gin.Context) {
-	client := getClient()
-	defer client.Disconnect(context.Background())
+	client, err := getClient(c)
+	if err != nil {
+		c.AbortWithStatusJSON(500, err.Error())
+	}
+	defer client.Disconnect(c)
 	collection := getUserCollection(client)
 
 	objectID, err := primitive.ObjectIDFromHex(c.Param("userID"))
@@ -75,7 +89,7 @@ func deleteUserByID(c *gin.Context) {
 	}
 	filter := bson.M{"_id": objectID}
 	var result bson.M
-	collection.FindOneAndDelete(context.Background(), filter).Decode(&result)
+	collection.FindOneAndDelete(c, filter).Decode(&result)
 
 	if result == nil {
 		message := "Failed to remove user with this ID " + c.Param("userID")
@@ -87,8 +101,11 @@ func deleteUserByID(c *gin.Context) {
 
 }
 func modifyUserEmail(c *gin.Context) {
-	client := getClient()
-	defer client.Disconnect(context.Background())
+	client, err := getClient(c)
+	if err != nil {
+		c.AbortWithStatusJSON(500, err.Error())
+	}
+	defer client.Disconnect(c)
 	collection := getUserCollection(client)
 
 	value := bson.M{
@@ -98,27 +115,26 @@ func modifyUserEmail(c *gin.Context) {
 	}
 	objectID, err := primitive.ObjectIDFromHex(c.Param("userID"))
 	if err != nil {
-		c.String(500, "Invalid input. Please check format")
-		return
+		c.AbortWithStatusJSON(500, err.Error())
 	}
 	filter := bson.M{"_id": objectID}
 	fmt.Println(value)
 	var output bson.M
-	collection.FindOneAndUpdate(context.Background(), filter, value).Decode(&output)
+	collection.FindOneAndUpdate(c, filter, value).Decode(&output)
 	if err != nil {
-		log.Fatal(err)
+		c.AbortWithStatusJSON(500, err.Error())
 	}
 	c.JSON(200, output)
 }
 func modifyUserByID(c *gin.Context) {
-	client := getClient()
-	defer client.Disconnect(context.Background())
+	client, err := getClient(c)
+	defer client.Disconnect(c)
 	collection := getUserCollection(client)
 
 	var value bson.M
-	err := c.ShouldBindJSON(&value)
+	err = c.ShouldBindJSON(&value)
 	if err != nil {
-		log.Fatal(err)
+		c.AbortWithStatusJSON(500, err.Error())
 	}
 	update := bson.M{
 		"$set": value,
@@ -143,16 +159,19 @@ func modifyUserByID(c *gin.Context) {
 }
 
 func createUser(c *gin.Context) {
-	client := getClient()
-	defer client.Disconnect(context.Background())
+	client, err := getClient(c)
+	defer client.Disconnect(c)
 	collection := getUserCollection(client)
 
 	var values bson.A
-	err := c.ShouldBindJSON(&values)
+	err = c.ShouldBindJSON(&values)
 	if err != nil {
 		c.AbortWithStatusJSON(500, "Please provide an array of JSON files")
 	}
-	result, _ := collection.InsertMany(context.Background(), values)
+	result, err := collection.InsertMany(c, values)
+	if err != nil {
+		c.AbortWithStatusJSON(500, err.Error())
+	}
 	c.JSON(200, result.InsertedIDs)
 }
 

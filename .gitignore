@@ -14,3 +14,4 @@ smartSearch-GO
 vendor
 .vscode
 test.py
+mongo
