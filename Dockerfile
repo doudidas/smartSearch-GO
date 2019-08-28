@@ -35,10 +35,10 @@ COPY favicon.ico favicon.ico
 
 #Set env variable
 ENV GIN_MODE=release
-ENV MONGO_HOSTNAME=mongo
+ENV MONGO_HOSTNAME=smartsearch-db
 ENV MONGO_PORT=27017
 # Expose port
-EXPOSE 80
+EXPOSE 9000
 
 # Run the hello binary.
 ENTRYPOINT ["/app"]

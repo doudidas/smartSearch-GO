@@ -1,17 +1,27 @@
 version: '3'
 services:
-  spacelama-api:
+  smartsearch-api:
     container_name: smartsearch-api
     image: 'spacelama/api-go:dev'
     depends_on:
-      - mongo
+      - smartsearch-db
     ports:
       - "9000:9000"
-  mongo:
+    networks:
+      - frontend
+      - backend
+  smartsearch-db:
     image: 'mongo:latest'
-    container_name: mongo
+    container_name: smartsearch-db
     ports:
       - '27017:27017'
     volumes:
-      - '.mongo/configdb:/data/configdb'
-      - '.mongo/db:/data/db'
+      - './mongo/configdb:/data/configdb'
+      - './mongo/db:/data/db'
+    networks:
+      - backend
+networks:
+  frontend:
+    driver: bridge
+  backend:
+    driver: bridge
