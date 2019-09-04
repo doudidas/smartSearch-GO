@@ -2,11 +2,11 @@
 # STEP 1 build executable binary
 #################################
 
-FROM golang:alpine AS builder
+FROM golang:latest AS builder
 
 
 # Git is required for fetching the dependencies.
-RUN apk add --no-cache git
+# RUN apk add --no-cache git
 
 # Set the working directory outside $GOPATH to enable the support for modules.
 WORKDIR /src

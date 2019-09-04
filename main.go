@@ -29,9 +29,10 @@ func main() {
 		})
 		adminGroup.GET("healthcheck", func(c *gin.Context) {
 			var response gin.H
-			_, err := getClient(c)
-			if err != nil {
-				response = gin.H{"api": "true", "mongo": "false"}
+			client, err := getClient(c)
+			defer client.Disconnect(c)
+			if err != nil || client == nil {
+				response = gin.H{"api": "true", "mongo": "true"}
 			} else {
 				response = gin.H{"api": "true", "mongo": "true"}
 			}
