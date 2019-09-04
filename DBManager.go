@@ -17,7 +17,7 @@ var hostname string
 var port string
 
 // DBTimeout is the maximum response time from DB
-const DBTimeout = 500
+const DBTimeout = 5000
 
 func setMongoParameters() {
 	if os.Getenv("MONGO_HOSTNAME") != "" {
