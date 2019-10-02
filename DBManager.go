@@ -56,7 +56,7 @@ func getClient(c *gin.Context) (*mongo.Client, error) {
 }
 
 func getDatabase(c *mongo.Client) *mongo.Database {
-	name := "GoSmartSearchDatabase"
+	name := "smartsearch"
 	database := c.Database(name)
 	return database
 }

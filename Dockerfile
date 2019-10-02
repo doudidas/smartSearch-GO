@@ -19,7 +19,9 @@ RUN go mod download
 COPY ./ ./
 
 # Build the executable to `/app`. Mark the build as statically linked.
-RUN CGO_ENABLED=0 go build -installsuffix 'static' -o /app .
+ 
+RUN CGO_ENABLED=0 cd initDB ; go build -installsuffix 'static' -o ../build/initDB .
+RUN CGO_ENABLED=0 go build -installsuffix 'static' -o build/app .
 
 #################################
 # STEP 2 Copy into a small image
@@ -28,7 +30,7 @@ RUN CGO_ENABLED=0 go build -installsuffix 'static' -o /app .
 FROM scratch
 
 # Import the compiled executable from the first stage.
-COPY --from=builder /app /app
+COPY --from=builder /src/build /build
 
 # Add Favicon
 COPY favicon.ico favicon.ico
@@ -41,4 +43,4 @@ ENV MONGO_PORT=27017
 EXPOSE 9000
 
 # Run the hello binary.
-ENTRYPOINT ["/app"]
+CMD ["/build/app"]
