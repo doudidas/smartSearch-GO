@@ -39,6 +39,7 @@ COPY favicon.ico favicon.ico
 ENV GIN_MODE=release
 ENV MONGO_HOSTNAME=smartsearch-db
 ENV MONGO_PORT=27017
+ENV PORT=9000
 # Expose port
 EXPOSE 9000
 

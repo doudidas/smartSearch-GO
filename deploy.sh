@@ -1,6 +1,6 @@
 #!/bin/bash
 
-branchName = git branch | grep \* | cut -d ' ' -f2
+branch=$(git branch | grep \* | cut -d ' ' -f2)
 
 if [ "$branch" == "master" ]
 then
@@ -9,5 +9,6 @@ else
     tag=$branch
 fi
 
+echo $tag
 docker build -t spacelama/api-go:$tag .
 docker push spacelama/api-go:$tag
