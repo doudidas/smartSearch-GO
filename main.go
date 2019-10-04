@@ -45,7 +45,7 @@ func main() {
 			userGroup.DELETE(":userID", deleteUserByID)
 			userGroup.PUT(":userID/email/:email", modifyUserEmail)
 			userGroup.PUT(":userID", modifyUserByID)
-			userGroup.POST("", createUser)
+			userGroup.POST("", createUsers)
 		}
 		topicGroup := adminGroup.Group("topic")
 		{

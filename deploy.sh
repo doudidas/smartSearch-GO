@@ -1,12 +1,12 @@
 #!/bin/bash
-echo Please choose branch to deploy ? [master/dev] default: dev
-read branch
+
+branchName = git branch | grep \* | cut -d ' ' -f2
 
 if [ "$branch" == "master" ]
 then
     tag="latest"
 else
-    tag="dev"
+    tag=$branch
 fi
 
 docker build -t spacelama/api-go:$tag .
