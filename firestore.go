@@ -11,7 +11,7 @@ import (
 const projectID = "spacelama"
 const credantialsPath = "./GCP-service-account.json"
 
-func addUsersOnFirebase(c *gin.Context, users []map[string]interface{}) ([]string, error) {
+func addUsersOnFirebase(c *gin.Context, users []User) ([]string, error) {
 	var output []string
 	for _, user := range users {
 		id, err := addUserOnFirebase(c, user)
@@ -23,7 +23,7 @@ func addUsersOnFirebase(c *gin.Context, users []map[string]interface{}) ([]strin
 	return output, nil
 }
 
-func addUserOnFirebase(c *gin.Context, user map[string]interface{}) (string, error) {
+func addUserOnFirebase(c *gin.Context, user User) (string, error) {
 
 	client, err := firestore.NewClient(c, projectID, option.WithCredentialsFile(credantialsPath))
 	if err != nil {
@@ -38,19 +38,20 @@ func addUserOnFirebase(c *gin.Context, user map[string]interface{}) (string, err
 	return docRef.ID, nil
 }
 
-func getUserFromFirebaseByID(c *gin.Context, id string) (map[string]interface{}, error) {
+func getUserFromFirebaseByID(c *gin.Context, id string) (User, error) {
+	var user User
 	client, err := firestore.NewClient(c, projectID, option.WithCredentialsFile(credantialsPath))
 	if err != nil {
-		return nil, err
+		return user, err
 	}
 	// Close client when done.
 	defer client.Close()
 
 	doc, err := client.Collection("users").Doc(id).Get(c)
-	user := doc.Data()
-	user["id"] = doc.Ref.ID
+	_ = doc.DataTo(&user)
+	user.ID = doc.Ref.ID
 	if err != nil {
-		return nil, err
+		return user, err
 	}
 	return user, nil
 }
@@ -62,11 +63,11 @@ func deleteUserFromFirebase(c *gin.Context, id string) error {
 	}
 	// Close client when done.
 	defer client.Close()
-	
+
 	_, err = client.Collection("users").Doc(id).Delete(c)
 	return err
 }
-func getUsersFromFirebase(c *gin.Context, pageNumber int, pageSize int) ([]map[string]interface{}, error) {
+func getUsersFromFirebase(c *gin.Context, pageNumber int, pageSize int) ([]User, error) {
 	client, err := firestore.NewClient(c, projectID, option.WithCredentialsFile(credantialsPath))
 	if err != nil {
 		return nil, err
@@ -75,7 +76,7 @@ func getUsersFromFirebase(c *gin.Context, pageNumber int, pageSize int) ([]map[s
 	defer client.Close()
 
 	iter := client.Collection("users").Limit(pageSize).Offset(pageSize * pageNumber).Documents(c)
-	var output []map[string]interface{}
+	var output []User
 	for {
 		doc, err := iter.Next()
 		if err == iterator.Done {
@@ -84,9 +85,25 @@ func getUsersFromFirebase(c *gin.Context, pageNumber int, pageSize int) ([]map[s
 		if err != nil {
 			return nil, err
 		}
-		user := doc.Data()
-		user["id"] = doc.Ref.ID
+		var user User
+		_ = doc.DataTo(&user)
+		user.ID = doc.Ref.ID
 		output = append(output, user)
 	}
 	return output, nil
+}
+
+func modifyUserOnFirebase(c *gin.Context, userID string, user User) error {
+	var err error
+	client, err := firestore.NewClient(c, projectID, option.WithCredentialsFile(credantialsPath))
+	if err != nil {
+		return err
+	}
+	// Close client when done.
+	defer client.Close()
+	_, err = client.Collection("users").Doc(userID).Set(c, user)
+	if err != nil {
+		return err
+	}
+	return nil
 }

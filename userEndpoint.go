@@ -4,11 +4,21 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 )
+
+// User structure from Database
+type User struct {
+	Email     string `json:"email"`
+	Firstname string `json:"firstname"`
+	ID        string `json:"id"`
+	Lastname  string `json:"lastname"`
+	Picture   struct {
+		Large     string `json:"large"`
+		Medium    string `json:"medium"`
+		Thumbnail string `json:"thumbnail"`
+	} `json:"picture"`
+	Username string `json:"username"`
+}
 
 func getUserbyID(c *gin.Context) {
 	user, err := getUserFromFirebaseByID(c, c.Param("userID"))
@@ -27,65 +37,43 @@ func deleteUserByID(c *gin.Context) {
 	c.Done()
 }
 func modifyUserEmail(c *gin.Context) {
-	// client, err := getClient(c)
-	// if err != nil {
-	// 	c.AbortWithStatusJSON(500, err.Error())
-	// }
-	// defer client.Disconnect(c)
-	// collection := getUserCollection(client)
+	// 	// client, err := getClient(c)
+	// 	// if err != nil {
+	// 	// 	c.AbortWithStatusJSON(500, err.Error())
+	// 	// }
+	// 	// defer client.Disconnect(c)
+	// 	// collection := getUserCollection(client)
 
-	// value := bson.M{
-	// 	"$set": bson.M{
-	// 		"email": c.Param("email"),
-	// 	},
-	// }
-	// objectID, err := primitive.ObjectIDFromHex(c.Param("userID"))
-	// if err != nil {
-	// 	c.AbortWithStatusJSON(500, err.Error())
-	// }
-	// filter := bson.M{"_id": objectID}
-	// fmt.Println(value)
-	// var output bson.M
-	// collection.FindOneAndUpdate(c, filter, value).Decode(&output)
-	// if err != nil {
-	// 	c.AbortWithStatusJSON(500, err.Error())
-	// }
-	// c.JSON(200, output)
+	// 	// value := bson.M{
+	// 	// 	"$set": bson.M{
+	// 	// 		"email": c.Param("email"),
+	// 	// 	},
+	// 	// }
+	// 	// objectID, err := primitive.ObjectIDFromHex(c.Param("userID"))
+	// 	// if err != nil {
+	// 	// 	c.AbortWithStatusJSON(500, err.Error())
+	// 	// }
+	// 	// filter := bson.M{"_id": objectID}
+	// 	// fmt.Println(value)
+	// 	// var output bson.M
+	// 	// collection.FindOneAndUpdate(c, filter, value).Decode(&output)
+	// 	// if err != nil {
+	// 	// 	c.AbortWithStatusJSON(500, err.Error())
+	// 	// }
+	// 	// c.JSON(200, output)
 }
 func modifyUserByID(c *gin.Context) {
-	client, err := getClient(c)
-	defer client.Disconnect(c)
-	collection := getUserCollection(client)
-
-	var value bson.M
-	err = c.ShouldBindJSON(&value)
+	var newUser User
+	c.ShouldBindJSON(&newUser)
+	err := modifyUserOnFirebase(c, c.Param("userID"), newUser)
 	if err != nil {
 		c.AbortWithStatusJSON(500, err.Error())
 	}
-	update := bson.M{
-		"$set": value,
-	}
-
-	objectID, err := primitive.ObjectIDFromHex(c.Param("userID"))
-	if err != nil {
-		c.String(500, "Invalid input. Please check format")
-		return
-	}
-	filter := bson.M{"_id": objectID}
-	var output bson.M
-
-	opt := options.FindOneAndUpdateOptions{}
-	opt.SetReturnDocument(options.After)
-
-	collection.FindOneAndUpdate(c, filter, update, &opt).Decode(&output)
-	if err != nil {
-		c.AbortWithError(500, err)
-	}
-	c.JSON(200, output)
+	c.Done()
 }
 
 func createUsers(c *gin.Context) {
-	var values []map[string]interface{}
+	var values []User
 	err := c.ShouldBindJSON(&values)
 	if err != nil {
 		c.AbortWithStatusJSON(500, "Please provide an array of JSON files")
@@ -107,7 +95,4 @@ func getUsers(c *gin.Context) {
 		c.AbortWithStatusJSON(500, err.Error())
 	}
 	c.JSON(200, result)
-}
-func getUserCollection(client *mongo.Client) *mongo.Collection {
-	return getDatabase(client).Collection("userCollection")
 }
