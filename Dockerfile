@@ -40,17 +40,14 @@ ENV MONGO_HOSTNAME=smartsearch-db
 ENV MONGO_PORT=27017
 
 # GCP Credantials
-ENV ProjectID=
-ENV PrivateKeyID=
-ENV PrivateKey=
-ENV ClientEmail=
-ENV ClientID=
-ENV ClientX509CertUR=
+ENV PROJECT_ID=
+ENV PRIVATE_KEY_ID=
+ENV PRIVATE_KEY=
+ENV CLIENT_EMAIL=
+ENV CLIENT_ID=
+ENV CLIENT_CERT=
 
 # Expose port
 EXPOSE 9000
-
-# Volume to store credantials JSON file
-VOLUME [ "/credantials" ]
 # Run the hello binary.
 CMD ["/build/app"]

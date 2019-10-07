@@ -35,12 +35,12 @@ func init() {
 		AuthURI:                 "https://accounts.google.com/o/oauth2/auth",
 		TokenURI:                "https://oauth2.googleapis.com/token",
 		AuthProviderX509CertURL: "https://www.googleapis.com/oauth2/v1/certs",
-		ProjectID:               os.Getenv("project_id"),
-		PrivateKeyID:            os.Getenv("private_key_id"),
-		PrivateKey:              os.Getenv("private_key"),
-		ClientEmail:             os.Getenv("client_email"),
-		ClientID:                os.Getenv("client_id"),
-		ClientX509CertUR:        os.Getenv("client_x509_cert_url"),
+		ProjectID:               os.Getenv("PROJECT_ID"),
+		PrivateKeyID:            os.Getenv("PRIVATE_ID_KEY"),
+		PrivateKey:              os.Getenv("PRIVATE_KEY"),
+		ClientEmail:             os.Getenv("CLIENT_EMAIL"),
+		ClientID:                os.Getenv("CLIENT_ID"),
+		ClientX509CertUR:        os.Getenv("CLIENT_CERT"),
 	}
 	byteValue, _ := json.Marshal(credantials)
 	clientOptions = option.WithCredentialsJSON(byteValue)
