@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"errors"
-	"io/ioutil"
 	"os"
 
 	"cloud.google.com/go/firestore"
@@ -13,9 +12,6 @@ import (
 )
 
 // Sets your Google Cloud Platform project ID.
-const projectID = "spacelama"
-const credantialsPath = "./credantials/GCP-service-account.json"
-
 var credantials FirebaseServiceAccount
 var clientOptions option.ClientOption
 
@@ -33,48 +29,21 @@ type FirebaseServiceAccount struct {
 	ClientX509CertUR        string `json:"client_x509_cert_url"`
 }
 
-func initFirebase() error {
-	// Define Client Options from credantials file
-	jsonFile, err := os.Open(credantialsPath)
-	if err != nil {
-		return err
-	}
-	defer jsonFile.Close()
-	// read our opened json file as a byte array.
-	byteValue, err := ioutil.ReadAll(jsonFile)
-	if err != nil {
-		return err
-	}
-	// we unmarshal our byteArray which contains our
-	// jsonFile's content into 'credantials' which we defined above
-	err = json.Unmarshal(byteValue, &credantials)
-	if err != nil {
-		return err
-	}
-	clientOptions = option.WithCredentialsJSON(byteValue)
-	return nil
-}
-
 func init() {
-	// Define Client Options from credantials file
-	jsonFile, err := os.Open(credantialsPath)
-	if err != nil {
-		panic(err)
+	credantials = FirebaseServiceAccount{
+		Type:                    "service_account",
+		AuthURI:                 "https://accounts.google.com/o/oauth2/auth",
+		TokenURI:                "https://oauth2.googleapis.com/token",
+		AuthProviderX509CertURL: "https://www.googleapis.com/oauth2/v1/certs",
+		ProjectID:               os.Getenv("project_id"),
+		PrivateKeyID:            os.Getenv("private_key_id"),
+		PrivateKey:              os.Getenv("private_key"),
+		ClientEmail:             os.Getenv("client_email"),
+		ClientID:                os.Getenv("client_id"),
+		ClientX509CertUR:        os.Getenv("client_x509_cert_url"),
 	}
-	defer jsonFile.Close()
-	// read our opened json file as a byte array.
-	byteValue, err := ioutil.ReadAll(jsonFile)
-	if err != nil {
-		panic(err)
-	}
-	// we unmarshal our byteArray which contains our
-	// jsonFile's content into 'credantials' which we defined above
-	err = json.Unmarshal(byteValue, &credantials)
-	if err != nil {
-		panic(err)
-	}
+	byteValue, _ := json.Marshal(credantials)
 	clientOptions = option.WithCredentialsJSON(byteValue)
-	// return nil
 }
 
 func addUsersOnFirebase(c *gin.Context, users []User) ([]string, error) {
@@ -174,7 +143,7 @@ func modifyUserOnFirebase(c *gin.Context, userID string, user User) error {
 }
 
 func getFireBaseClient(c *gin.Context) (*firestore.Client, error) {
-	client, err := firestore.NewClient(c, projectID, clientOptions)
+	client, err := firestore.NewClient(c, credantials.ProjectID, clientOptions)
 	if err != nil {
 		return nil, errors.New("Failed to generate Firebase Client")
 	}

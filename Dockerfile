@@ -19,8 +19,6 @@ RUN go mod download
 COPY ./ ./
 
 # Build the executable to `/app`. Mark the build as statically linked.
- 
-RUN CGO_ENABLED=0 cd initDB ; go build -installsuffix 'static' -o ../build/initDB .
 RUN CGO_ENABLED=0 go build -installsuffix 'static' -o build/app .
 
 #################################
@@ -36,12 +34,22 @@ COPY --from=builder /src/build /build
 COPY favicon.ico favicon.ico
 
 #Set env variable
+
 ENV GIN_MODE=release
 ENV MONGO_HOSTNAME=smartsearch-db
 ENV MONGO_PORT=27017
 
+# GCP Credantials
+ENV ProjectID=
+ENV PrivateKeyID=
+ENV PrivateKey=
+ENV ClientEmail=
+ENV ClientID=
+ENV ClientX509CertUR=
+
 # Expose port
 EXPOSE 9000
+
 # Volume to store credantials JSON file
 VOLUME [ "/credantials" ]
 # Run the hello binary.
