@@ -19,3 +19,4 @@ initDB
 credantials
 credentials/gcp-service-account.json
 credentials/administrators.json
+build/app
