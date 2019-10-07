@@ -17,3 +17,5 @@ test.py
 mongo
 initDB
 credantials
+credentials/gcp-service-account.json
+credentials/administrators.json
