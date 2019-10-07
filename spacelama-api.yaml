@@ -1,0 +1,57 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name:  spacelama
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name:  spacelama-api
+  labels:
+    name:  spacelama-api
+spec:
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        name:  spacelama-api
+    spec:
+      containers:
+      - image:  spacelama/api-go:firestore
+        name:  spacelama-api
+        resources:
+          requests:
+            cpu: "20m"
+            memory: "55M"
+        ports:
+        - containerPort:  9000
+          name: gingonic
+        volumeMounts:
+        - name: gcp-service-account
+          mountPath: "/credentials/gcp-service-account.json"
+          readOnly: true
+        - name: administrators
+          mountPath: "/credentials/administrators.json"
+          readOnly: true
+      volumes:
+      - name: gcp-service-account
+        secret:
+          secretName: gcp-service-account.json
+      - name: administrators
+        secret:
+          secretName: administrators.json
+---
+  kind: Service
+  apiVersion: v1
+  metadata:
+    name:  spacelama-api
+  spec:
+    selector:
+      app:  spacelama-api
+    type:  LoadBalancer
+    ports:
+    - name:  gingonic
+      port:  9000

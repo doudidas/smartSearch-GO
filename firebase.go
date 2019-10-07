@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"errors"
+	"io/ioutil"
 	"os"
 
 	"cloud.google.com/go/firestore"
@@ -12,7 +13,7 @@ import (
 )
 
 // Sets your Google Cloud Platform project ID.
-var credantials FirebaseServiceAccount
+var credentials FirebaseServiceAccount
 var clientOptions option.ClientOption
 
 // FirebaseServiceAccount structure from GCP
@@ -29,20 +30,14 @@ type FirebaseServiceAccount struct {
 	ClientX509CertUR        string `json:"client_x509_cert_url"`
 }
 
-func init() {
-	credantials = FirebaseServiceAccount{
-		Type:                    "service_account",
-		AuthURI:                 "https://accounts.google.com/o/oauth2/auth",
-		TokenURI:                "https://oauth2.googleapis.com/token",
-		AuthProviderX509CertURL: "https://www.googleapis.com/oauth2/v1/certs",
-		ProjectID:               os.Getenv("PROJECT_ID"),
-		PrivateKeyID:            os.Getenv("PRIVATE_ID_KEY"),
-		PrivateKey:              os.Getenv("PRIVATE_KEY"),
-		ClientEmail:             os.Getenv("CLIENT_EMAIL"),
-		ClientID:                os.Getenv("CLIENT_ID"),
-		ClientX509CertUR:        os.Getenv("CLIENT_CERT"),
+func setCredentials() {
+	jsonFile, err := os.Open("./credentials/gcp-service-account.json")
+	if err != nil {
+		panic(err)
 	}
-	byteValue, _ := json.Marshal(credantials)
+	defer jsonFile.Close()
+	byteValue, _ := ioutil.ReadAll(jsonFile)
+	json.Unmarshal(byteValue, &credentials)
 	clientOptions = option.WithCredentialsJSON(byteValue)
 }
 
@@ -143,7 +138,10 @@ func modifyUserOnFirebase(c *gin.Context, userID string, user User) error {
 }
 
 func getFireBaseClient(c *gin.Context) (*firestore.Client, error) {
-	client, err := firestore.NewClient(c, credantials.ProjectID, clientOptions)
+	if credentials.ProjectID == "" {
+		setCredentials()
+	}
+	client, err := firestore.NewClient(c, credentials.ProjectID, clientOptions)
 	if err != nil {
 		return nil, errors.New("Failed to generate Firebase Client")
 	}
