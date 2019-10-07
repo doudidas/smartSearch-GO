@@ -28,7 +28,7 @@ RUN CGO_ENABLED=0 go build -installsuffix 'static' -o build/app .
 FROM scratch
 
 # Import the compiled executable from the first stage.
-COPY --from=builder /src/build /build
+COPY --from=builder /src/build /
 
 # Add Favicon
 COPY favicon.ico favicon.ico
@@ -36,18 +36,10 @@ COPY favicon.ico favicon.ico
 #Set env variable
 
 ENV GIN_MODE=release
-ENV MONGO_HOSTNAME=smartsearch-db
-ENV MONGO_PORT=27017
-
-# GCP Credantials
-ENV PROJECT_ID=
-ENV PRIVATE_KEY_ID=
-ENV PRIVATE_KEY=
-ENV CLIENT_EMAIL=
-ENV CLIENT_ID=
-ENV CLIENT_CERT=
 
 # Expose port
-EXPOSE 9000
+EXPOSE 80
+
+VOLUME [ "/credentials" ]
 # Run the hello binary.
-CMD ["/build/app"]
+CMD ["/app"]

@@ -1,6 +1,10 @@
 package main
 
 import (
+	"encoding/json"
+	"io/ioutil"
+	"os"
+
 	"github.com/gin-contrib/location"
 	"github.com/gin-gonic/gin"
 	"github.com/thinkerou/favicon"
@@ -8,19 +12,11 @@ import (
 
 const defaultPageValue = 20
 
-func init() {
-	err := testFirebase()
-	if err != nil {
-		panic(err)
-	}
-}
-
 func main() {
 	router := gin.Default()
 	router.Use(location.Default())
 	router.Use(favicon.New("./favicon.ico"))
-
-	admin := gin.Accounts{"admin": "VMware1!"}
+	admin := setAdminUser()
 
 	router.GET("ping", func(c *gin.Context) {
 		c.String(200, "pong")
@@ -54,6 +50,19 @@ func main() {
 			topicGroup.POST("", createTopic)
 		}
 	}
+	router.Run(":80")
+}
 
-	router.Run(":9000")
+func setAdminUser() map[string]string {
+	var admins map[string]string
+	jsonFile, err := os.Open("./credentials/administrators.json")
+	defer jsonFile.Close()
+
+	if err != nil {
+		return gin.Accounts{"admin": "VMware1!"}
+	}
+
+	byteValue, _ := ioutil.ReadAll(jsonFile)
+	json.Unmarshal(byteValue, &admins)
+	return gin.Accounts(admins)
 }
