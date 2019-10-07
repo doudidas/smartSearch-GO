@@ -9,13 +9,17 @@ import (
 const defaultPageValue = 20
 
 func init() {
-	setMongoParameters()
+	err := testFirebase()
+	if err != nil {
+		panic(err)
+	}
 }
 
 func main() {
 	router := gin.Default()
 	router.Use(location.Default())
 	router.Use(favicon.New("./favicon.ico"))
+
 	admin := gin.Accounts{"admin": "VMware1!"}
 
 	router.GET("ping", func(c *gin.Context) {
@@ -29,13 +33,7 @@ func main() {
 		})
 		adminGroup.GET("healthcheck", func(c *gin.Context) {
 			var response gin.H
-			client, err := getClient(c)
-			defer client.Disconnect(c)
-			if err != nil || client == nil {
-				response = gin.H{"api": "true", "mongo": "true"}
-			} else {
-				response = gin.H{"api": "true", "mongo": "true"}
-			}
+			response = gin.H{"api": "true", "mongo": "true"}
 			c.JSON(200, response)
 		})
 		userGroup := adminGroup.Group("user")
