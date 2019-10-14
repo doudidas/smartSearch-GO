@@ -143,7 +143,7 @@ func getFireBaseClient(c *gin.Context) (*firestore.Client, error) {
 	}
 	client, err := firestore.NewClient(c, credentials.ProjectID, clientOptions)
 	if err != nil {
-		return nil, errors.New("Failed to generate Firebase Client")
+		return nil, errors.New("Failed to generate Firebase Client: " + err.Error())
 	}
 	return client, nil
 }

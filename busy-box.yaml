@@ -1,0 +1,41 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  namespace: spacelama
+  name: busybox
+  labels:
+    name: busybox
+spec:
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        name: busybox
+    spec:
+      containers:
+      - image:  busybox:latest
+        imagePullPolicy: Always
+        name:  busybox
+        resources:
+          requests:
+            cpu: "20m"
+            memory: "55M"
+        ports:
+        - containerPort:  80
+          name: gingonic
+        # volumeMounts:
+        # - name: gcp-service-account
+        #   mountPath: "/credentials/gcp-service-account.json"
+        # - name: administrators
+        #   mountPath: "/credentials/administrators.json"
+      # volumes:
+      # - name: gcp-service-account
+      #   secret:
+      #     secretName: spacelama-gcp-service-account-secret
+      # - name: administrators
+      #   secret:
+      #     secretName: spacelama-administrators-secret
