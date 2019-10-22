@@ -21,7 +21,7 @@ COPY ./ ./
 # Build the executable to `/app`. Mark the build as statically linked.
  
 RUN CGO_ENABLED=0 cd initDB ; go build -installsuffix 'static' -o ../build/initDB .
-RUN CGO_ENABLED=0 go build -installsuffix 'static' -o build/app .
+RUN CGO_ENABLED=0 go build -installsuffix 'static' -o build/smartsearch .
 
 #################################
 # STEP 2 Copy into a small image
@@ -30,8 +30,8 @@ RUN CGO_ENABLED=0 go build -installsuffix 'static' -o build/app .
 FROM scratch
 
 # Import the compiled executable from the first stage.
-COPY --from=builder /src/build /build
-
+COPY --from=builder /src/build /src/bin
+COPY default-credantials.json /etc/smartsearch/apiAdmins.json
 # Add Favicon
 COPY favicon.ico favicon.ico
 
@@ -41,6 +41,6 @@ ENV MONGO_HOSTNAME=smartsearch-db
 ENV MONGO_PORT=27017
 # Expose port
 EXPOSE 9000
-
+VOLUME [ "/etc/smartsearch/" ]
 # Run the hello binary.
-CMD ["/build/app"]
+CMD ["/src/bin/smartsearch"]

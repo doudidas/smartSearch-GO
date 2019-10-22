@@ -11,6 +11,7 @@ require (
 	github.com/google/go-cmp v0.2.0 // indirect
 	github.com/kr/pretty v0.1.0 // indirect
 	github.com/mattn/go-isatty v0.0.8 // indirect
+	github.com/sethvargo/go-password v0.1.3
 	github.com/stretchr/testify v1.4.0 // indirect
 	github.com/thinkerou/favicon v0.1.0
 	github.com/tidwall/pretty v0.0.0-20190325153808-1166b9ac2b65 // indirect

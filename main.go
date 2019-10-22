@@ -16,7 +16,8 @@ func main() {
 	router := gin.Default()
 	router.Use(location.Default())
 	router.Use(favicon.New("./favicon.ico"))
-	admin := gin.Accounts{"admin": "VMware1!"}
+
+	admin := getAdmins()
 
 	router.GET("ping", func(c *gin.Context) {
 		c.String(200, "pong")
