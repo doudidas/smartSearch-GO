@@ -1,6 +1,8 @@
 package main
 
 import (
+	"os"
+
 	"github.com/gin-contrib/location"
 	"github.com/gin-gonic/gin"
 	"github.com/thinkerou/favicon"
@@ -15,7 +17,10 @@ func init() {
 func main() {
 	router := gin.Default()
 	router.Use(location.Default())
-	router.Use(favicon.New("./favicon.ico"))
+
+	if _, err := os.Stat("./favicon.ico"); err == nil {
+		router.Use(favicon.New("./favicon.ico"))
+	}
 
 	admin := getAdmins()
 
