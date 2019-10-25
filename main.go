@@ -38,7 +38,7 @@ func main() {
 			client, err := getClient(c)
 			defer client.Disconnect(c)
 			if err != nil || client == nil {
-				response = gin.H{"api": "true", "mongo": "true"}
+				response = gin.H{"api": "true", "mongo": "false"}
 			} else {
 				response = gin.H{"api": "true", "mongo": "true"}
 			}
