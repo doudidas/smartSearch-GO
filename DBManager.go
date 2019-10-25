@@ -39,7 +39,7 @@ func getClient(c *gin.Context) (*mongo.Client, error) {
 
 	client, err := mongo.Connect(c, options.Client().ApplyURI("mongodb://"+hostname+":27017"))
 	if err != nil {
-		return nil, errors.New("Failed to generate Mongo Client")
+		return nil, errors.New("Failed to generate Mongo Client: " + err.Error())
 	}
 
 	customLog("pinging database with this FQDN: " + hostname)
