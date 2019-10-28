@@ -1,8 +1,8 @@
 #!/bin/bash
-echo Please choose branch to deploy ? [master/dev] default: dev
+echo Please choose branch to deploy ? [latest/dev] default: dev
 read branch
 
-if [ "$branch" == "master" ]
+if [ "$branch" == "latest" ]
 then
     tag="latest"
 else

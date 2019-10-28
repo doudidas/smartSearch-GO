@@ -15,3 +15,5 @@ vendor
 .vscode
 test.py
 mongo
+go.mod
+go.sum
