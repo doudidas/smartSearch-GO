@@ -60,3 +60,15 @@ func getDatabase(c *mongo.Client) *mongo.Database {
 	database := c.Database(name)
 	return database
 }
+
+func checkHealth(c *gin.Context) {
+	var response gin.H
+	client, err := getClient(c)
+	defer client.Disconnect(c)
+	if err != nil || client == nil {
+		response = gin.H{"api": "true", "mongo": "false"}
+	} else {
+		response = gin.H{"api": "true", "mongo": "true"}
+	}
+	c.JSON(200, response)
+}
