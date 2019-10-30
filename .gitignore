@@ -17,3 +17,4 @@ test.py
 mongo
 go.mod
 go.sum
+build/
