@@ -45,7 +45,6 @@ func setMongoParameters() {
 }
 
 func getClient(c *gin.Context) (*mongo.Client, error) {
-	options.Client().SetTLSConfig()
 	client, err := mongo.Connect(c, options.Client().ApplyURI(mongoURL))
 	if err != nil {
 		return nil, errors.New("Failed to generate Mongo Client: " + err.Error())
