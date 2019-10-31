@@ -14,7 +14,7 @@ WORKDIR /src
 # Fetch dependencies first; they are less susceptible to change on every build
 # and will therefore be cached for speeding up the next build
 COPY ./go.mod ./
-RUN go mod download
+RUN go mod tidy
 # Import the code from the context.
 COPY ./ ./
 
