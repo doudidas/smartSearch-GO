@@ -11,18 +11,6 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-// ListAccounts godoc
-// @Summary List accounts
-// @Description get accounts
-// @Accept  json
-// @Produce  json
-// @Param q query string false "name search by q"
-// @Success 200 {array} model.Account
-// @Header 200 {string} Token "qwerty"
-// @Failure 400 {object} httputil.HTTPError
-// @Failure 404 {object} httputil.HTTPError
-// @Failure 500 {object} httputil.HTTPError
-// @Router /accounts [get]
 func getUserbyID(c *gin.Context) {
 	client, err := getClient(c)
 	if err != nil {
@@ -83,6 +71,9 @@ func getUsers(c *gin.Context) {
 	}
 	if err := cur.Err(); err != nil {
 		c.AbortWithStatusJSON(500, err.Error())
+	}
+	if result == nil {
+		result = []bson.M{}
 	}
 	c.JSON(200, result)
 }
