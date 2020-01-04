@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/gin-contrib/cors"
 	"github.com/gin-contrib/location"
 	"github.com/gin-gonic/gin"
 )
@@ -13,14 +14,14 @@ func init() {
 
 func main() {
 	router := gin.Default()
-	router.Use(location.Default())
 
+	config := cors.DefaultConfig()
+	config.AllowHeaders = []string{"Authorization", "Content-Type"}
+	config.AllowAllOrigins = true
+	router.Use(location.Default(), cors.New(config))
+	// router.Use()
 	adminGroup := router.Group("/api", gin.BasicAuth(getAdmins()))
 	{
-		adminGroup.GET("", func(c *gin.Context) {
-			c.Request.URL.Path = "/swagger/index.html"
-			router.HandleContext(c)
-		})
 		adminGroup.GET("healthcheck", checkHealth)
 		userGroup := adminGroup.Group("user")
 		{
