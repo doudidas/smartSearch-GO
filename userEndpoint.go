@@ -31,9 +31,26 @@ func getUserbyID(c *gin.Context) {
 	if err != nil {
 		c.AbortWithStatusJSON(500, err.Error())
 	}
-
 	c.JSON(200, result)
 }
+
+// func getUserWithFilter(c *gin.Context) {
+// 	client, err := getClient(c)
+// 	defer client.Disconnect(c)
+// 	collection := getUserCollection(client)
+// 	input := bson.M{}
+// 	err = c.ShouldBindJSON(&input)
+// 	if err != nil {
+// 		c.AbortWithStatusJSON(500, "Please provide a JSON file")
+// 	}
+// 	var result User
+// 	collection.FindOne(c, input).Decode(&result)
+// 	fmt.Println(result)
+// 	if err != nil {
+// 		c.AbortWithStatus(404)
+// 	}
+// 	c.JSON(200, result)
+// }
 
 func getUsers(c *gin.Context) {
 	page := c.DefaultQuery("page", "0")
@@ -180,4 +197,9 @@ func createUser(c *gin.Context) {
 
 func getUserCollection(client *mongo.Client) *mongo.Collection {
 	return getDatabase(client).Collection("userCollection")
+}
+
+type User struct {
+	_id   string `json:"_id"`
+	email string `json:"email"`
 }

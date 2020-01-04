@@ -19,13 +19,17 @@ func main() {
 	config.AllowHeaders = []string{"Authorization", "Content-Type"}
 	config.AllowAllOrigins = true
 	router.Use(location.Default(), cors.New(config))
-	// router.Use()
+	router.GET("/", func(c *gin.Context) { c.String(200, "") })
+	router.GET("/ping", func(c *gin.Context) { c.String(200, "pong") })
+
 	adminGroup := router.Group("/api", gin.BasicAuth(getAdmins()))
 	{
 		adminGroup.GET("healthcheck", checkHealth)
+
 		userGroup := adminGroup.Group("user")
 		{
 			userGroup.GET("", getUsers)
+			// userGroup.POST("/filter/", getUserWithFilter)
 			userGroup.GET(":userID", getUserbyID)
 			userGroup.DELETE(":userID", deleteUserByID)
 			userGroup.PUT(":userID/email/:email", modifyUserEmail)
@@ -41,7 +45,8 @@ func main() {
 			topicGroup.POST("", createTopic)
 		}
 	}
-
-	router.GET("ping", func(c *gin.Context) { c.String(200, "pong") })
 	router.Run(":9000")
+	// currentHostname, _ := os.Hostname()
+	// fmt.Println(currentHostname)
+	// autotls.Run(router, currentHostname)
 }
