@@ -15,7 +15,7 @@ require (
 	github.com/mattn/go-isatty v0.0.10 // indirect
 	github.com/sethvargo/go-password v0.1.3
 	github.com/tidwall/pretty v1.0.0 // indirect
-	github.com/ugorji/go/codec v1.1.7 // indirect
+	github.com/ugorji/go v1.1.7 // indirect
 	github.com/xdg/scram v0.0.0-20180814205039-7eeb5667e42c // indirect
 	github.com/xdg/stringprep v1.0.0 // indirect
 	go.mongodb.org/mongo-driver v1.1.2
