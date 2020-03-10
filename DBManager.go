@@ -24,7 +24,7 @@ func setMongoParameters() {
 		mongoURL = os.Getenv("MONGO_ONELINE_URL")
 	} else {
 		//  Else compose url
-		var hostname, port string
+		var hostname, port, replicatSet string
 
 		if os.Getenv("MONGO_HOSTNAME") != "" {
 			hostname = os.Getenv("MONGO_HOSTNAME")
@@ -38,7 +38,12 @@ func setMongoParameters() {
 			customWarn("USING DEFAULT DATABASE")
 			port = "27017"
 		}
-		mongoURL = "mongodb://" + hostname + ":" + port
+		if os.Getenv("REPLICAT_SET_NAME") != "" {
+			replicatSet = "?replicaSet=" + os.Getenv("REPLICAT_SET_NAME")
+		} else {
+			replicatSet = ""
+		}
+		mongoURL = "mongodb://" + hostname + ":" + port + replicatSet
 	}
 
 	customLog("DB: {name: mongo, url: " + mongoURL + "}")

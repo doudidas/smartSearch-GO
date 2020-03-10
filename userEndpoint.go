@@ -11,18 +11,6 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-// ListAccounts godoc
-// @Summary List accounts
-// @Description get accounts
-// @Accept  json
-// @Produce  json
-// @Param q query string false "name search by q"
-// @Success 200 {array} model.Account
-// @Header 200 {string} Token "qwerty"
-// @Failure 400 {object} httputil.HTTPError
-// @Failure 404 {object} httputil.HTTPError
-// @Failure 500 {object} httputil.HTTPError
-// @Router /accounts [get]
 func getUserbyID(c *gin.Context) {
 	client, err := getClient(c)
 	if err != nil {
@@ -43,9 +31,26 @@ func getUserbyID(c *gin.Context) {
 	if err != nil {
 		c.AbortWithStatusJSON(500, err.Error())
 	}
-
 	c.JSON(200, result)
 }
+
+// func getUserWithFilter(c *gin.Context) {
+// 	client, err := getClient(c)
+// 	defer client.Disconnect(c)
+// 	collection := getUserCollection(client)
+// 	input := bson.M{}
+// 	err = c.ShouldBindJSON(&input)
+// 	if err != nil {
+// 		c.AbortWithStatusJSON(500, "Please provide a JSON file")
+// 	}
+// 	var result User
+// 	collection.FindOne(c, input).Decode(&result)
+// 	fmt.Println(result)
+// 	if err != nil {
+// 		c.AbortWithStatus(404)
+// 	}
+// 	c.JSON(200, result)
+// }
 
 func getUsers(c *gin.Context) {
 	page := c.DefaultQuery("page", "0")
@@ -83,6 +88,9 @@ func getUsers(c *gin.Context) {
 	}
 	if err := cur.Err(); err != nil {
 		c.AbortWithStatusJSON(500, err.Error())
+	}
+	if result == nil {
+		result = []bson.M{}
 	}
 	c.JSON(200, result)
 }
@@ -190,3 +198,9 @@ func createUser(c *gin.Context) {
 func getUserCollection(client *mongo.Client) *mongo.Collection {
 	return getDatabase(client).Collection("userCollection")
 }
+
+// User structure for login token
+// type User struct {
+// 	_id   string `json:"_id"`
+// 	email string `json:"email"`
+// }
