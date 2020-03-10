@@ -199,7 +199,8 @@ func getUserCollection(client *mongo.Client) *mongo.Collection {
 	return getDatabase(client).Collection("userCollection")
 }
 
-type User struct {
-	_id   string `json:"_id"`
-	email string `json:"email"`
-}
+// User structure for login token
+// type User struct {
+// 	_id   string `json:"_id"`
+// 	email string `json:"email"`
+// }
