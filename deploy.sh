@@ -1,23 +1,34 @@
 #!/bin/bash
-image=spacelama/web
+
+image=spacelama/smartsearch-go
 # Uncomment for debug
 # set -x
+
 
 # User arguments
 response=$1
 message=$2
 newTag=$3
 
-# Get version from version.txt
+#  Init version.txt file
+if [ ! -f "./version.txt" ]; then
+    echo "Init version File"
+    echo "0.0" > ./version.txt
+fi
+
+# Get major/minor versions from version.txt
+
 majVersion=$(cat ./version.txt | cut -d'.' -f1)
 minVersion=$(cat ./version.txt | cut -d'.' -f2)
 echo current version : $majVersion.$minVersion
 
 # Ask user for major or minor update
 if [[ -z "$response" ]]; then
+
     echo [Git: 1/3] major or minor update ? [major/minor, default: minor]
     read response
 else
+
     if [[ "$response" == "major" ]]; then
         majVersion=$((majVersion + 1))
         minVersion=0
@@ -26,9 +37,11 @@ else
     fi
 fi
 
+
 #  Ask user for commit message
 if [[ -z "$message" ]]; then
     echo [Git: 2/3] To you to add commit message ? [default: $majVersion.$minVersion]
+
     read message
     if [[ -z "$message" ]]; then
         message='version: '$majVersion'.'$minVersion
@@ -36,7 +49,9 @@ if [[ -z "$message" ]]; then
 fi
 #  Ask user if he want to generate new tag
 if [[ -z "$newTag" ]]; then
+
     echo [Git: 3/3] Do you want to generate new tag ? [y/n default: n]
+
     read newTag
     if [[ -z "$newTag" ]]; then
         newTag='n'
@@ -51,6 +66,7 @@ git commit -m "$message"
 if [[ "$newTag" == "y" ]]; then
     git tag -a "v$majVersion.$minVersion" -m "$message"
 fi
+
 
 git push
 

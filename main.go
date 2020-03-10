@@ -45,6 +45,10 @@ func main() {
 			topicGroup.POST("", createTopic)
 		}
 	}
+
+	router.GET("/", func(c *gin.Context) { c.String(200, "") })
+	router.GET("ping", func(c *gin.Context) { c.String(200, "pong") })
+
 	router.Run(":9000")
 	// currentHostname, _ := os.Hostname()
 	// fmt.Println(currentHostname)
