@@ -34,24 +34,6 @@ func getUserbyID(c *gin.Context) {
 	c.JSON(200, result)
 }
 
-// func getUserWithFilter(c *gin.Context) {
-// 	client, err := getClient(c)
-// 	defer client.Disconnect(c)
-// 	collection := getUserCollection(client)
-// 	input := bson.M{}
-// 	err = c.ShouldBindJSON(&input)
-// 	if err != nil {
-// 		c.AbortWithStatusJSON(500, "Please provide a JSON file")
-// 	}
-// 	var result User
-// 	collection.FindOne(c, input).Decode(&result)
-// 	fmt.Println(result)
-// 	if err != nil {
-// 		c.AbortWithStatus(404)
-// 	}
-// 	c.JSON(200, result)
-// }
-
 func getUsers(c *gin.Context) {
 	page := c.DefaultQuery("page", "0")
 	pageSize := c.DefaultQuery("size", strconv.Itoa(defaultPageValue))

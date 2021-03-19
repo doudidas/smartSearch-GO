@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
@@ -32,13 +33,26 @@ func getTopicbyID(c *gin.Context) {
 }
 
 func getTopics(c *gin.Context) {
+	page := c.DefaultQuery("page", "0")
+	pageSize := c.DefaultQuery("size", strconv.Itoa(defaultPageValue))
+	findOptions := options.Find()
+	pageAsNumber, err := strconv.ParseInt(page, 10, 64)
+	if err != nil {
+		c.AbortWithStatusJSON(500, err.Error())
+	}
+	sizeAsNumber, err := strconv.ParseInt(pageSize, 10, 64)
+	if err != nil {
+		c.AbortWithStatusJSON(500, err.Error())
+	}
+	findOptions.SetSkip(pageAsNumber * sizeAsNumber)
+	findOptions.SetLimit(sizeAsNumber)
 	client, err := getClient(c)
 	if err != nil {
 		c.AbortWithStatusJSON(500, err.Error())
 	}
 	defer client.Disconnect(c)
 	collection := getTopicCollection(client)
-	cur, err := collection.Find(c, bson.D{{}})
+	cur, err := collection.Find(c, bson.D{{}}, findOptions)
 	if err != nil {
 		c.AbortWithStatusJSON(500, err.Error())
 	}
