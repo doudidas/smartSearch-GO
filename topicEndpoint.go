@@ -32,6 +32,21 @@ func getTopicbyID(c *gin.Context) {
 	c.JSON(200, result)
 }
 
+func getTopicNumber(c *gin.Context) {
+	client, err := getClient(c)
+	if err != nil {
+		c.AbortWithStatusJSON(500, err.Error())
+	}
+	defer client.Disconnect(c)
+	collection := getTopicCollection(client)
+	result, err := collection.CountDocuments(c, bson.D{})
+	if err != nil {
+		c.AbortWithStatusJSON(500, err.Error())
+	}
+	defer client.Disconnect(c)
+	c.JSON(200, result)
+}
+
 func getTopics(c *gin.Context) {
 	page := c.DefaultQuery("page", "0")
 	pageSize := c.DefaultQuery("size", strconv.Itoa(defaultPageValue))

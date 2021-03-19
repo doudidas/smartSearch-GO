@@ -29,6 +29,7 @@ func main() {
 		userGroup := adminGroup.Group("user")
 		{
 			userGroup.GET("", getUsers)
+			// userGroup.GET("/count", getUserNumber)
 			// userGroup.POST("/filter/", getUserWithFilter)
 			userGroup.GET(":userID", getUserbyID)
 			userGroup.DELETE(":userID", deleteUserByID)
@@ -44,6 +45,9 @@ func main() {
 			topicGroup.PUT(":topicID", modifyTopicByID)
 			topicGroup.POST("", createTopic)
 		}
+		adminGroup.GET("countTopic", getTopicNumber)
+		adminGroup.GET("countUser", getUserNumber)
+
 	}
 	router.Run(":9000")
 }

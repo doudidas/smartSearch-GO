@@ -181,6 +181,21 @@ func getUserCollection(client *mongo.Client) *mongo.Collection {
 	return getDatabase(client).Collection("userCollection")
 }
 
+func getUserNumber(c *gin.Context) {
+	client, err := getClient(c)
+	if err != nil {
+		c.AbortWithStatusJSON(500, err.Error())
+	}
+	defer client.Disconnect(c)
+	collection := getUserCollection(client)
+	result, err := collection.CountDocuments(c, bson.D{})
+	if err != nil {
+		c.AbortWithStatusJSON(500, err.Error())
+	}
+	defer client.Disconnect(c)
+	c.JSON(200, result)
+}
+
 // User structure for login token
 // type User struct {
 // 	_id   string `json:"_id"`
