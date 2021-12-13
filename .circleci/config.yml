@@ -1,0 +1,20 @@
+version: 2.1
+orbs:
+  docker: circleci/docker@2.0.1
+jobs:
+  build:
+    docker:
+      # replace with your preferred image
+      - image: cimg/base:stable
+    steps:
+      - docker/build:
+          attach-at: ./ 
+          debug: false 
+          docker-context: . 
+          image: smartSearch-GO 
+          lint-dockerfile: true 
+          registry: ghcr.io 
+workflows:
+  example-workflow:
+    jobs:
+      - build
