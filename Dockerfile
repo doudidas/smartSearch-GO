@@ -20,8 +20,8 @@ COPY ./ ./
 
 # Build the executable to `/app`. Mark the build as statically linked.
  
-RUN CGO_ENABLED=0 go build -installsuffix 'static' -o build/smartsearch .
-
+# RUN CGO_ENABLED=0 go build -installsuffix 'static' -o build/smartsearch .
+RUN GOOS=linux GOARCH=amd64 go build -ldflags="-w -s" -o build/smartsearch .
 #################################
 # STEP 2 Copy into a small image
 #################################
