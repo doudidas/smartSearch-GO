@@ -49,5 +49,6 @@ func main() {
 		adminGroup.GET("countUser", getUserNumber)
 
 	}
+	// Hello
 	router.Run(":9000")
 }
